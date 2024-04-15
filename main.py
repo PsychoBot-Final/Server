@@ -2,11 +2,11 @@ import re
 import json
 import base64
 import configs
-import socketio
 from configs import get_bot_version
 from zenora import APIClient
 from flask_socketio import SocketIO
 from user import User
+from settings import AUTH_URL, REDIRECT_URI
 from flask import (
     Flask, 
     jsonify,
@@ -18,16 +18,14 @@ from constants import (
     API_TOKEN, 
     CLIENT_ID, 
     CLIENT_SECRET,
-    REDIRECT_URI, 
-    SCOPE, 
-    AUTH_URL,
+    SCOPE,
     PATTERN
 )
 from database import (
     get_user_data,
     get_all_script_names
 )
-
+print('AUTH:', AUTH_URL)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '063922124'
