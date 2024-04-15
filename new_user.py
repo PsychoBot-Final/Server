@@ -1,0 +1,7 @@
+from database import create_new_user
+
+USER_ID = 241476603538964481
+DAYS_UNTIL_EXPIRY = 3000
+INSTANCES = 5
+
+create_new_user(USER_ID, DAYS_UNTIL_EXPIRY, INSTANCES)
