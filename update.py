@@ -3,20 +3,6 @@ import subprocess
 
 TAG = 'psychobotserver'
 
-# PROCESSES = {
-#     'BUILD:': ['docker', 'build', '-t', TAG, '.'],
-#     'TAG:': ['docker', 'tag', 'psychobotserver', 'motheenb/psychobotserver:latest'],
-#     'PUSH:': ['docker', 'push', 'motheenb/psychobotserver']
-# }
-
-# for step, process in PROCESSES.items():
-#     try:
-#         print(f'-->{step}<--')
-#         subprocess.check_call(process)
-#         print()
-#     except subprocess.CalledProcessError as e:
-#         print('Error!')
-
 try:
     subprocess.check_call(['docker', 'build', '-t', TAG, '.'])
     print(f"Docker image '{TAG}' built successfully.")

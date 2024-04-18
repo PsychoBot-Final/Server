@@ -5,8 +5,7 @@ import configs
 from configs import get_bot_version
 from zenora import APIClient
 from flask_socketio import SocketIO
-from user import User
-from settings import AUTH_URL, REDIRECT_URI
+from settings import REDIRECT_URI
 from flask import (
     Flask, 
     jsonify,
@@ -25,11 +24,11 @@ from database import (
     get_user_data,
     get_all_script_names
 )
-print('AUTH:', AUTH_URL)
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '063922124'
-server = SocketIO(app)
+server = SocketIO(app, cors_allowed_origins="*")
 zenora_client = APIClient(API_TOKEN, client_secret=CLIENT_SECRET)
 
 user_sessions = {}
@@ -38,31 +37,38 @@ session_users = {}
 # START OF SERVER
 
 @server.on('connect')
-def connect():
-    print('INCOMING CONNECTION')
+def on_connect():
+    global user_sessions, session_users
+    session_id = request.sid
+    user_id = request.args.get('user_id')
+    if user_id is None:
+        return
+    try:
+        user_id = int(user_id)
+        print('User ID:', user_id)
+    except ValueError as ve:
+        print('Invalid type for User ID:', ve)
+        return
+    send_message('authenticated', not user_id in user_sessions, session_id)
+    if not user_id in user_sessions:
+        user_sessions[user_id] = session_id
+        session_users[session_id] = user_id
 
 @server.on('disconnect')
-def disconnect():
+def on_disconnect():
     global session_users
-    print('Disconnected!')
     session_id = request.sid
-    disconnected_user: User = session_users[session_id]
-    disconnected_user.disconnect()
-    del user_sessions[disconnected_user.user_id]
-    del session_users[session_id]
+    if session_id in session_users:
+        user_id = session_users[session_id]
+        del user_sessions[user_id]
+        del session_users[session_id]
+        print(user_id, 'has disconnected!')
 
-@server.on('new_connection')
-def new_connection(data):
-    global user_sessions, session_users
-    data = dict(data)
-    user_id: int = data.get('user_id')
-    expiry_date: str = data.get('expiry_date')
-    if user_id in user_sessions:
-        server.emit('id_in_use', {'user_id': user_id})
-    else:
-        session = request.sid
-        user_sessions[user_id] = session
-        session_users[session] = User(user_id, expiry_date)
+def send_message(event: str, data: any, sid: any) -> None:
+    try:
+        server.emit(event, data, to=sid)
+    except Exception as e:
+        print('Error:', e)
 
 # END OF SERVER
 
@@ -70,7 +76,7 @@ def new_connection(data):
 
 @app.route('/')
 def root():
-    return redirect(AUTH_URL)
+    return redirect(f'https://discord.com/api/oauth2/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&scope={SCOPE}')
 
 # @app.route('/scripts/<string:script_name>', methods=['GET'])
 # def get_script_source(script_name):
@@ -95,9 +101,11 @@ def get_verified():
         bearer_client = APIClient(session.get('token'), bearer=True)
         current_user = bearer_client.users.get_current_user()
         matches = re.findall(PATTERN, str(current_user))
+        #
         user_data = dict(matches)
         user_id = int(user_data.get('id'))
         username = str(user_data.get('username'))
+        #
         user_data = get_user_data(user_id)
         status = user_data.get('status')
         instances = user_data.get('instances')

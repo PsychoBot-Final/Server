@@ -3,8 +3,6 @@ from pymongo import MongoClient
 from datetime import datetime, timedelta
 from constants import VALID, INVALID, EXPIRED, MONGO_URI
 
-print('MONGO URI:', MONGO_URI)
-print()
 
 mongo_client = MongoClient(MONGO_URI, tls=True, tlsAllowInvalidCertificates=True)
 database = mongo_client.psychobot
@@ -24,8 +22,7 @@ def get_user_data(user_id: int) -> dict:
     return {
         'status': status,
         'expiry_date': expiry_date.strftime("%Y-%m-%d %H:%M:%S"),
-        'instances': int(result.get('instances', 0)),
-        'running_instances': int(result.get('running_instances', 0))
+        'instances': int(result.get('instances', 0))
     }
 
 def create_new_user(user_id: int, days_until_expiry: int, instances: int) -> bool:
