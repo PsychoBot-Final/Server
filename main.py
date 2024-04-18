@@ -1,7 +1,4 @@
 import re
-import json
-import base64
-import configs
 from configs import get_bot_version
 from zenora import APIClient
 from flask_socketio import SocketIO
@@ -18,7 +15,8 @@ from constants import (
     CLIENT_ID, 
     CLIENT_SECRET,
     SCOPE,
-    PATTERN
+    PATTERN,
+    SECRET_KEY
 )
 from database import (
     get_user_data,
@@ -27,7 +25,7 @@ from database import (
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = '063922124'
+app.config['SECRET_KEY'] = SECRET_KEY
 server = SocketIO(app, cors_allowed_origins="*")
 zenora_client = APIClient(API_TOKEN, client_secret=CLIENT_SECRET)
 

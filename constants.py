@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+SECRET_KEY = os.environ.get('SECRET_KEY')
 API_TOKEN = os.environ.get('API_TOKEN')
 CLIENT_ID = os.environ.get('CLIENT_ID')
 CLIENT_SECRET = os.environ.get('CLIENT_SECRET')
