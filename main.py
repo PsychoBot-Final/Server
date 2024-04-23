@@ -20,7 +20,7 @@ from constants import (
 )
 from database import (
     get_user_data,
-    get_script
+    get_script_version
 )
 
 
@@ -78,8 +78,8 @@ def root():
 
 @app.route('/version/<string:script_name>', methods=['GET'])
 def handle_script_version(script_name: str) -> any:
-    result = get_script(script_name)
-    return jsonify({'version': float(result['version'])})
+    result = get_script_version(script_name)
+    return jsonify({'version': result})
 
 @app.route('/version/')
 def handle_version():

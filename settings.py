@@ -6,5 +6,5 @@ from constants import (
 )
 
 
-LOCAL = False
+LOCAL = True
 REDIRECT_URI = REDIRECT_URI_LOCAL if LOCAL else REDIRECT_URI_PUBLIC

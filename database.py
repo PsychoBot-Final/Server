@@ -18,8 +18,10 @@ def get_script_names() -> list:
     return [script['name'] for script in result]
 
 def get_script_version(name: str) -> float:
+    print('Name:', name)
     query = {'name': name}
     result = scripts.find_one(query)
+    print(result['version'])
     return float(result['version'])
 
 def get_script(name: str) -> dict:
@@ -45,7 +47,6 @@ def get_script(name: str) -> dict:
         'data': data
     }
     
-
 def get_user_data(user_id: int) -> dict:
     query = {'user_id': user_id}
     result = users.find_one(query)
@@ -66,6 +67,3 @@ def create_new_user(user_id: int, days_until_expiry: int, instances: int) -> boo
         'expiry_date': expiry_time.strftime("%Y-%m-%d %H:%M:%S")
     }
     return users.insert_one(query).inserted_id is not None
-
-
-print(get_script('Seers Woodcutter'))
