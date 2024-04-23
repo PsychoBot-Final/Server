@@ -20,7 +20,7 @@ from constants import (
 )
 from database import (
     get_user_data,
-    get_all_script_names
+    get_script
 )
 
 
@@ -76,15 +76,10 @@ def send_message(event: str, data: any, sid: any) -> None:
 def root():
     return redirect(f'https://discord.com/api/oauth2/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&scope={SCOPE}')
 
-
-# @app.route('/scripts/<string:script_name>', methods=['GET'])
-# def get_script_source(script_name):
-#     return jsonify({'id': script_name})
-    # cript_name = request.args.get('script_name')
-
 @app.route('/version/<string:script_name>', methods=['GET'])
 def handle_script_version(script_name: str) -> any:
-    print(script_name)
+    result = get_script(script_name)
+    return jsonify({'version': float(result['version'])})
 
 @app.route('/version/')
 def handle_version():

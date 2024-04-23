@@ -1,39 +1,54 @@
-import pymongo
+from gridfs import GridFS
+from base64 import b64encode
 from pymongo import MongoClient
 from datetime import datetime, timedelta
-from constants import VALID, INVALID, EXPIRED, MONGO_URI
+from constants import VALID, INVALID, EXPIRED, MONGO_URI, DELIMITER
 
 
 mongo_client = MongoClient(MONGO_URI, tls=True, tlsAllowInvalidCertificates=True)
 database = mongo_client.psychobot
-user_collection = database.users
-script_collection = database.script_files
-version_collection = database.script_versions
+users = database.users
+scripts = database.scripts
+source = database.source
+templates = database.templates
+fs = GridFS(database)
 
 def get_script_names() -> list:
-    result = version_collection.find({})
+    result = scripts.find({})
     return [script['name'] for script in result]
 
-def get_script(script_name: str, files=False) -> dict:
-    data = {}
-    query = {'name': script_name}
-    result = version_collection.find_one(query)
-    data['name'] = script_name
-    data['version'] = float(result['version'])
-    if files:
-        script_id = result['script']
-        query = {'_id': script_id}
-        result = script_collection.find_one(query)
-        data['class'] = result['class']
-        data['module'] = result['module']
-        data['source'] = result['files']['source']
-        data['model'] = result['files']['model']
-        data['templates'] = result['files']['templates']
-    return data
+def get_script_version(name: str) -> float:
+    query = {'name': name}
+    result = scripts.find_one(query)
+    return float(result['version'])
+
+def get_script(name: str) -> dict:
+    query = {'name': name}
+    result = scripts.find_one(query)
+    name = result['name']
+    class_ = result['class']
+    version = result['version']
+    file_name = result['file_name']
+    result = source.find_one({'file_name': file_name})
+    source_data = result['data']
+    result = templates.find_one({'file_name': file_name})
+    templates_data = result['data']
+    model = fs.find_one({'file_name': file_name})
+    model_data = model.read()
+    model_data = b64encode(model_data).decode('utf-8')
+    data = source_data + DELIMITER + model_data + DELIMITER + templates_data
+    return {
+        'version': float(version),
+        'name': name,
+        'class': class_,
+        'file_name': file_name,
+        'data': data
+    }
+    
 
 def get_user_data(user_id: int) -> dict:
     query = {'user_id': user_id}
-    result = user_collection.find_one(query)
+    result = users.find_one(query)
     expiry_date = datetime.strptime(result['expiry_date'], "%Y-%m-%d %H:%M:%S") if result else datetime.now()
     status = (VALID if datetime.now() < expiry_date else EXPIRED) if result else INVALID
     instances = int(result['instances']) if result else 0
@@ -50,4 +65,7 @@ def create_new_user(user_id: int, days_until_expiry: int, instances: int) -> boo
         'instances': int(instances),
         'expiry_date': expiry_time.strftime("%Y-%m-%d %H:%M:%S")
     }
-    return user_collection.insert_one(query).inserted_id is not None
+    return users.insert_one(query).inserted_id is not None
+
+
+print(get_script('Seers Woodcutter'))
