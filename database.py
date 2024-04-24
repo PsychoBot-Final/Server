@@ -11,7 +11,15 @@ users = database.users
 scripts = database.scripts
 source = database.source
 templates = database.templates
+api = database.api
 fs = GridFS(database)
+
+def get_api() -> list:
+    files = []
+    documents = api.find({})
+    for entry in documents:
+        files.append({'filename': entry['filename'], 'content': entry['content']})
+    return files
 
 def get_script_names() -> list:
     result = scripts.find({})

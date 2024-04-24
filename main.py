@@ -19,7 +19,10 @@ from constants import (
     SECRET_KEY
 )
 from database import (
+    get_api,
+    get_script,
     get_user_data,
+    get_script_names,
     get_script_version
 )
 
@@ -62,11 +65,27 @@ def on_disconnect():
         del session_users[session_id]
         print(user_id, 'has disconnected!')
 
+
+@server.event
+def request_api(data) -> None:
+    session_id = request.sid
+    send_message('api_files', {'files': get_api()}, session_id)
+
+@server.event
+def request_script(data) -> None:
+    session_id = request.sid
+    type = data['type']
+    name = data['name']
+    if type == 'names':
+        send_message('script_names', get_script_names(), session_id)
+    elif type == 'full':
+        send_message('full_script', get_script(name), session_id)
+
 def send_message(event: str, data: any, sid: any) -> None:
     try:
         server.emit(event, data, to=sid)
     except Exception as e:
-        print('Error:', e)
+        print(f'Error Send Message ({event}):', e)
 
 # END OF SERVER
 
