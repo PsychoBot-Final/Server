@@ -46,7 +46,7 @@ def get_script(name: str) -> dict:
     model = fs.find_one({'file_name': file_name})
     model_data = model.read()
     model_data = b64encode(model_data).decode('utf-8')
-    data = source_data + DELIMITER + model_data + DELIMITER + templates_data
+    data = f'{source_data}{DELIMITER}{model_data}{DELIMITER}{templates_data}'
     return {
         'version': float(version),
         'name': name,

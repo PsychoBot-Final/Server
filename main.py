@@ -61,10 +61,10 @@ def on_disconnect():
     session_id = request.sid
     if session_id in session_users:
         user_id = session_users[session_id]
+        print('User', user_id, 'disconnected...')
         del user_sessions[user_id]
         del session_users[session_id]
         print(user_id, 'has disconnected!')
-
 
 @server.event
 def request_api(data) -> None:
@@ -93,7 +93,12 @@ def send_message(event: str, data: any, sid: any) -> None:
 
 @app.route('/')
 def root():
-    return redirect(f'https://discord.com/api/oauth2/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&scope={SCOPE}')
+    auth_key = request.args.get('auth_key')
+    print('Auth Key:', auth_key)
+    if auth_key == '12345':
+        return redirect(f'https://discord.com/api/oauth2/authorize?client_id={CLIENT_ID}&redirect_uri={REDIRECT_URI}&response_type=code&scope={SCOPE}')
+    else:
+        return jsonify({'Error': 'verifying file integrity!'})
 
 @app.route('/version/<string:script_name>', methods=['GET'])
 def handle_script_version(script_name: str) -> any:
