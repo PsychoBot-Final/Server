@@ -10,8 +10,9 @@ database = mongo_client.psychobot
 users = database.users
 scripts = database.scripts
 source = database.source
-templates = database.templates
+script_templates = database.script_templates
 api = database.api
+api_templates = database.api_templates
 fs = GridFS(database)
 
 def get_api() -> list:
@@ -32,6 +33,16 @@ def get_script_version(name: str) -> float:
     print(result['version'])
     return float(result['version'])
 
+def get_api_templates() -> dict:
+    all_api_templates = {}
+    result = api_templates.find({})
+    for doc in result:
+        file_name = doc['filename']
+        file_data = doc['data']
+        all_api_templates[file_name] = file_data
+    return all_api_templates
+
+
 def get_script(name: str) -> dict:
     query = {'name': name}
     result = scripts.find_one(query)
@@ -41,7 +52,7 @@ def get_script(name: str) -> dict:
     file_name = result['file_name']
     result = source.find_one({'file_name': file_name})
     source_data = result['data']
-    result = templates.find_one({'file_name': file_name})
+    result = script_templates.find_one({'file_name': file_name})
     templates_data = result['data']
     model = fs.find_one({'file_name': file_name})
     model_data = model.read()

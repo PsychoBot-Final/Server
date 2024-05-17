@@ -23,13 +23,14 @@ from database import (
     get_script,
     get_user_data,
     get_script_names,
+    get_api_templates,
     get_script_version
 )
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
-server = SocketIO(app, cors_allowed_origins="*")
+server = SocketIO(app, cors_allowed_origins=["http://www.psychobot.org"])
 zenora_client = APIClient(API_TOKEN, client_secret=CLIENT_SECRET)
 
 user_sessions = {}
@@ -65,6 +66,11 @@ def on_disconnect():
         del user_sessions[user_id]
         del session_users[session_id]
         print(user_id, 'has disconnected!')
+
+@server.event
+def request_api_templates(data) -> None:
+    sid = request.sid
+    send_message('api_templates', get_api_templates(), sid)
 
 @server.event
 def request_api(data) -> None:
