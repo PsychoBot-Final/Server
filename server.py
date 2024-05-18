@@ -36,6 +36,22 @@ zenora_client = APIClient(API_TOKEN, client_secret=CLIENT_SECRET)
 user_sessions = {}
 session_users = {}
 
+
+# def verify_discord_user(discord_id):
+#     # This function should verify the discord_id with your database or other means
+#     user_data = get_user_data(discord_id)
+#     return user_data
+
+# def token_required(f):
+#     @wraps(f)
+#     def decorated_function(*args, **kwargs):
+#         discord_id = request.args.get('discord_id')
+#         if not discord_id or not verify_discord_user(discord_id):
+#             emit('unauthorized', {'message': 'Unauthorized'}, to=request.sid)
+#             return
+#         return f(*args, **kwargs, user_data=verify_discord_user(discord_id))
+#     return decorated_function
+
 # SocketIO #
 
 @server.event
@@ -63,7 +79,7 @@ def connect() -> None:
         logging.info(f'User {discord_id} does not have a valid membership.')
         return
     
-    
+
     
 
 
