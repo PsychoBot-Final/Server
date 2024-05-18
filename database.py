@@ -66,17 +66,42 @@ def get_script(name: str) -> dict:
         'data': data
     }
     
-def get_user_data(user_id: int) -> dict:
-    query = {'user_id': user_id}
+def get_user_data(discord_id: int) -> dict:
+    query = {'user_id': discord_id}
     result = users.find_one(query)
-    expiry_date = datetime.strptime(result['expiry_date'], "%Y-%m-%d %H:%M:%S") if result else datetime.now()
-    status = (VALID if datetime.now() < expiry_date else EXPIRED) if result else INVALID
-    instances = int(result['instances']) if result else 0
+    if not result:
+        return {
+            'status': INVALID,
+            'expiry_date': datetime.now(),
+            'instances:': 0
+        }
+    
+    try:
+        expiry_date = datetime.strptime(result['expiry_date'], "%Y-%m-%d %H:%M:%S")
+    except KeyError:
+        expiry_date = datetime.now()
+
+    status = VALID if datetime.now() < expiry_date else EXPIRED
+    instances = int(result.get('instances', 0))
     return {
         'status': status,
         'expiry_date': expiry_date.strftime("%Y-%m-%d %H:%M:%S"),
         'instances': instances
     }
+
+# def get_user_data(user_id: int) -> dict:
+#     query = {'user_id': user_id}
+#     result = users.find_one(query)
+#     if result:
+#         expiry_date = datetime.strptime(result['expiry_date'], "%Y-%m-%d %H:%M:%S") if result else datetime.now()
+#         status = (VALID if datetime.now() < expiry_date else EXPIRED) if result else INVALID
+#         instances = int(result['instances']) if result else 0
+#         return {
+#             'status': status,
+#             'expiry_date': expiry_date.strftime("%Y-%m-%d %H:%M:%S"),
+#             'instances': instances
+#         }
+#     return None
 
 def create_new_user(user_id: int, days_until_expiry: int, instances: int) -> bool:
     expiry_time = datetime.now() + timedelta(days=days_until_expiry)

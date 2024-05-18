@@ -26,7 +26,10 @@ from database import (
     get_api_templates,
     get_script_version
 )
+import logging
+from functools import wraps
 
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = SECRET_KEY
