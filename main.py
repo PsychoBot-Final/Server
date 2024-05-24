@@ -220,6 +220,10 @@ def send_message(event: str, data: any, to: str) -> None:
         print(f'Error Send Message ({event}):', e)
 
 
+@app.route('/favicon.ico')
+def favicon() -> Response:
+    return '', 204
+
 @app.route('/')
 def root() -> Response:
     auth_key = request.args.get('auth_key', default=None, type=str)
@@ -260,11 +264,10 @@ def verified() -> Response:
         })
     return redirect('/')
 
-# @app.errorhandler(Exception)
-# def handle_exception(e):
-#     logging.error(f"Error: {e} at {request.url}")
-#     return jsonify({"error": "An error occurred"}), 500
-
+@app.errorhandler(Exception)
+def handle_exception(e):
+    logging.error(f"Error: {e} at {request.url}")
+    # Should I add a return ?
 
 if __name__ == '__main__':
     server.run(app, debug=True, host='0.0.0.0', port=5000)
