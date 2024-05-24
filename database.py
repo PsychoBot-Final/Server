@@ -15,7 +15,7 @@ api = database.api
 api_templates = database.api_templates
 fs = GridFS(database)
 
-def get_api() -> list:
+def get_api_files() -> list:
     files = []
     documents = api.find({})
     for entry in documents:

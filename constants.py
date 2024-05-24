@@ -12,7 +12,5 @@ REDIRECT_URI_LOCAL = os.environ.get('REDIRECT_URI_LOCAL')
 SCOPE = os.environ.get('SCOPE')
 MONGO_URI = os.environ.get('MONGO_URI')
 PATTERN = r'(\w+)\s*=\s*"([^"]*)"'
-VALID, INVALID, EXPIRED = range(3)
+VALID, INVALID, EXPIRED, IN_USE = range(4)
 DELIMITER = '|'
-
-print(REDIRECT_URI_PUBLIC)
