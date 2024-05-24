@@ -48,46 +48,159 @@ class UserManager:
         self.session_users = {}
         self.user_expiry = {}
 
+
     def add_user(self, discord_id: int, expiry_date: str) -> str: # | None:
+        """
+        The `add_user` function in Python generates a UUID for a Discord user, stores the mapping between
+        Discord ID and UUID, sets an expiry date for the user, and returns the generated UUID.
+        
+        Args:
+          discord_id (int): The `discord_id` parameter is an integer representing the unique identifier of a
+        user on Discord.
+          expiry_date (str): The `expiry_date` parameter in the `add_user` method represents the date when
+        the user's access or subscription is set to expire. It is a string that typically contains the
+        expiration date in a specific format, such as "YYYY-MM-DD".
+        
+        Returns:
+          The `add_user` method is returning the `uuid` generated for the user that was added.
+        """
         uuid = self.generate_uuid()
         self.user_uuid[discord_id] = uuid
         self.uuid_users[uuid] = discord_id
         self.user_expiry[discord_id] = expiry_date
         return uuid
     
+
     def add_user_session(self, discord_id: int, session_id: str) -> bool:
+        """
+        The function `add_user_session` adds a user session with a Discord ID and session ID to two
+        dictionaries if the Discord ID is not already in use.
+        
+        Args:
+          discord_id (int): The `discord_id` parameter is an integer representing the unique identifier of a
+        user in a Discord server.
+          session_id (str): The `session_id` parameter in the `add_user_session` method is a string that
+        represents the unique identifier for a user session. This method is designed to associate a Discord
+        user ID with a session ID in two dictionaries: `user_sessions` and `session_users`.
+        
+        Returns:
+          A boolean value is being returned. If the `discord_id` is already in `self.user_sessions`, `False`
+        is returned. Otherwise, `True` is returned after adding the `discord_id` and `session_id` to the
+        respective dictionaries.
+        """
         if discord_id in self.user_sessions:
             return False
         self.user_sessions[discord_id] = session_id
         self.session_users[session_id] = discord_id
         return True
 
+
     def get_expiry_by_user(self, discord_id: int) -> Union[str, None]:
+        """
+        The function `get_expiry_by_user` retrieves the expiry date associated with a Discord user ID if it
+        exists.
+        
+        Args:
+          discord_id (int): The `discord_id` parameter is an integer representing the unique identifier for
+        a user on Discord.
+        
+        Returns:
+          the expiry date associated with the provided Discord ID if it exists in the `user_expiry`
+        dictionary. If the Discord ID is not found in the dictionary, it returns `None`.
+        """
         if discord_id not in self.user_expiry:
             return None
         return self.user_expiry.get(discord_id)
 
+
     def get_session_by_user(self, discord_id: int) -> Union[str, None]:
+        """
+        The function `get_session_by_user` retrieves a session based on a Discord user's ID if it exists in
+        the `user_sessions` dictionary.
+        
+        Args:
+          discord_id (int): The `discord_id` parameter is an integer representing the unique identifier of a
+        user in a Discord server.
+        
+        Returns:
+          The function `get_session_by_user` returns either a string (session data) or `None` depending on
+        whether the `discord_id` is found in the `user_sessions` dictionary.
+        """
         if discord_id not in self.user_sessions:
             return None
         return self.user_sessions.get(discord_id)
 
+
     def get_user_by_session(self, session_id: str) -> Union[int, None]:
+        """
+        The function `get_user_by_session` retrieves a user ID based on a session ID if it exists in the
+        session_users dictionary.
+        
+        Args:
+          session_id (str): Session ID is a unique identifier that is used to associate a user with their
+        session in a web application or system. It helps in tracking and managing user sessions to provide
+        personalized experiences and maintain security.
+        
+        Returns:
+          The `get_user_by_session` method returns either an integer (user ID) or `None`.
+        """
         if session_id not in self.session_users:
             return None
         return self.session_users.get(session_id)
 
+
     def get_uuid_by_user(self, discord_id: int) -> Union[str, None]:
+        """
+        The function `get_uuid_by_user` retrieves a UUID associated with a Discord user ID if it exists in
+        the `user_uuid` dictionary.
+        
+        Args:
+          discord_id (int): The `discord_id` parameter is an integer representing the unique identifier of a
+        user in a Discord server.
+        
+        Returns:
+          either a string (UUID) if the `discord_id` is found in the `user_uuid` dictionary, or `None` if
+        the `discord_id` is not present in the dictionary.
+        """
         if discord_id not in self.user_uuid:
             return None
         return self.user_uuid.get(discord_id)
 
+
     def get_user_by_uuid(self, uuid: str) -> Union[int, None]:
+        """
+        The function `get_user_by_uuid` retrieves a user by UUID from a dictionary and returns the user or
+        None if the UUID is not found.
+        
+        Args:
+          uuid (str): The `uuid` parameter in the `get_user_by_uuid` method is a string representing the
+        unique identifier of a user.
+        
+        Returns:
+          The function `get_user_by_uuid` is returning either an integer (user ID) or `None`. If the
+        provided UUID is not found in the `uuid_users` dictionary, it returns `None`. Otherwise, it returns
+        the user ID associated with the provided UUID.
+        """
         if uuid not in self.uuid_users:
             return None
         return self.uuid_users.get(uuid)
         
+
     def remove_user(self, session_id: str) -> bool:
+        """
+        The `remove_user` function removes a user from various dictionaries based on their session ID.
+        
+        Args:
+          session_id (str): The `session_id` parameter in the `remove_user` method is a string that
+        represents the unique identifier of a user session. This method is designed to remove a user from
+        various dictionaries and mappings within the class instance based on the provided `session_id`.
+        
+        Returns:
+          The `remove_user` method returns a boolean value - `True` if the user associated with the provided
+        `session_id` was successfully removed from all relevant dictionaries, and `False` if the
+        `session_id` was not found in `self.session_users` or if the associated user data could not be
+        removed for any reason.
+        """
         if session_id in self.session_users:
             discord_id = self.session_users.get(session_id)
             if discord_id in self.user_uuid:
@@ -100,7 +213,17 @@ class UserManager:
                 return True
         return False
 
+
     def generate_uuid(self) -> str:
+        """
+        The function generates a unique UUID using the shortuuid library and ensures it is not already in
+        use before returning it.
+        
+        Returns:
+          The `generate_uuid` method returns a unique identifier (UUID) in the form of a string. It
+        generates a new UUID using the `shortuuid` library and checks if it is not already present in the
+        `uuid_users` set. If the generated UUID is not in the set, it is returned as the result.
+        """
         while True:
             unique_id = shortuuid.uuid()
             if unique_id not in self.uuid_users:
@@ -224,6 +347,7 @@ def send_message(event: str, data: any, to: str) -> None:
 def favicon() -> Response:
     return '', 204
 
+
 @app.route('/')
 def root() -> Response:
     auth_key = request.args.get('auth_key', default=None, type=str)
@@ -232,12 +356,14 @@ def root() -> Response:
     else:
         return jsonify({'Error': 'cannot connect!'})
 
+
 @app.route('/callback')
 def callback() -> Response:
     code = request.args['code']
     access_token = zenora_client.oauth.get_access_token(code, REDIRECT_URI_PUBLIC).access_token
     session['token'] = access_token
     return redirect('/verified')
+
 
 @app.route('/verified')
 def verified() -> Response:
@@ -264,10 +390,12 @@ def verified() -> Response:
         })
     return redirect('/')
 
+
 @app.errorhandler(Exception)
 def handle_exception(e):
     logging.error(f"Error: {e} at {request.url}")
     # Should I add a return ?
+
 
 if __name__ == '__main__':
     server.run(app, debug=True, host='0.0.0.0', port=5000)
