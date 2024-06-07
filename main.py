@@ -240,16 +240,16 @@ user_manager = UserManager()
 
 def authorize_user(f):
     @wraps(f)
-    def decorated_function(event: str, data: dict, *args, **kwargs):
+    def decorated_function(data: dict, *args, **kwargs):
         session_id: str = request.sid
 
         if not (uuid:= data.get('uuid')):
             logging.warning(f"Authorization failed: UUID is required (Session ID: {session_id}).")
-            return {'event': event, 'result': 'Error # 1.'}
+            return {'error': 'Error # 1.'}
 
         if not (discord_id:= user_manager.get_user_by_uuid(uuid)):
             logging.warning(f'Failed to retrieve Discord ID from UUID {uuid}.')
-            return {'event': event, 'result': 'Error # 2.'}
+            return {'error': 'Error # 2.'}
 
         logging.info(f'User {discord_id} has made a successful request to the server.')
         
@@ -257,48 +257,28 @@ def authorize_user(f):
     return decorated_function
 
 
-@server.on('*')
+@server.on('request_script_names')
 @authorize_user
-def handle_events(event: str, data: dict) -> None:
-
-    if event == 'request_script_names':
-        return {'event': 'script_names', 'result': get_script_names()}
-    
-    elif event == 'request_api_templates':
-        return {'event': 'api_templates','result': get_api_templates()}
-
-    elif event == 'request_api_files':
-        return {'event': 'api_files', 'result': get_api_files()}
-
-    elif event == 'request_script':
-        script_name: str = data.get('script_name', None)
-        return {'event': 'script', 'result': get_script(script_name)}
-    
+def on_request_script_names(data: any) -> dict:
+    return {'event': 'script_names', 'result': get_script_names()}
 
 
-# @server.on('request_script_names')
-# @authorize_user
-# def on_request_script_names(data: any) -> dict:
-#     return {'result': get_script_names()}
+@server.on('request_api_templates')
+@authorize_user
+def on_request_api_templates(data: any) -> dict:
+    return {'event': 'api_templates','result': get_api_templates()}
 
 
-# @server.on('request_api_templates')
-# @authorize_user
-# def on_request_api_templates(data: any) -> dict:
-#     return {'result': get_api_templates()}
+@server.on('request_api_files')
+@authorize_user
+def on_request_api_files(data: any) -> dict:
+    return {'event': 'api_files', 'result': get_api_files()}
 
-
-# @server.on('request_api_files')
-# @authorize_user
-# def on_request_api_files(data: any) -> dict:
-#     return {'result': get_api_files()}
-
-
-# @server.on('request_script')
-# @authorize_user
-# def on_request_script(data: dict) -> dict:
-#     script_name: str = data.get('script_name')
-#     return {'result': get_script(script_name)}
+@server.on('request_script')
+@authorize_user
+def on_request_script(data: dict) -> dict:
+    script_name: str = data.get('script_name', None)
+    return {'event': 'script', 'result': get_script(script_name)}
 
 
 @server.event
